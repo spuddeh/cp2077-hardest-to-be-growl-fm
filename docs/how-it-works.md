@@ -71,10 +71,11 @@ declare. A three-event bank built from one source, with the second entry's segme
 different station's playlist and the third to the same one, played only the first entry. Holding
 the source constant rules out the audio, and the second entry rules out a per-playlist limit.
 
-The mechanism is still unknown. The objects are structurally sound - a generated multi-entry bank
-walks cleanly to its chunk boundary with every event resolving through action, segment and track to
-the right source. Object ordering is untested: entries are emitted as track, segment, action, event
-repeated, rather than grouped by type.
+This is a defect in the generated bank rather than an engine rule. `radio.bnk` holds 590 events and
+`cp_music.bnk` 2246, and both interleave object types the same way the generator does, so neither
+event count nor ordering is the cause. The remaining candidate is the nonzero `uInMemoryMediaSize`
+each generated track declares while the bank carries no `DIDX` or `DATA` chunk to hold that
+prefetch.
 
 **Declared duration.** `minDuration` must be the audible length, not the file length. Ten of the
 thirteen Growl FM tracks trim one to eight seconds off the tail and declare the trimmed value. An
