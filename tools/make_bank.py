@@ -1,23 +1,15 @@
-r"""Build a soundbank that plays a source file the game already ships as a Growl FM radio track.
-
-The song is 762143559.wem, the vocal take that plays in the apartment hangout playlist. The
-instrumental cue from the Alex scene, 528262674.wem, is a different recording and is not used here.
+r"""Build a soundbank that plays a file the game already ships as a Growl FM radio track.
 
 A vanilla radio track is an Event whose Play action targets a MusicSegment holding a MusicTrack,
-with the segment parented to the station's own playlist. This clones that whole shape from
-mus_radio_12_afterlife and retargets it, so every field not named below already carries a Growl FM
-track's settings.
+with the segment parented to the station's own playlist. This clones that shape from
+mus_radio_12_afterlife and retargets it, so every field not named below keeps a Growl FM track's
+settings. The segment must be owned here: an Event aimed at a segment inside another bank's
+hierarchy loads without error and plays nothing unless that hierarchy is live.
 
-The clone is what makes it work. An Event that points straight at a segment inside another bank's
-hierarchy loads without error and plays nothing when that hierarchy is not live - a quest's music
-switch container, for instance. Owning the segment avoids that.
+Put extra tracks in one bank rather than loading a second bank beside it.
 
-One bank can carry several tracks. Wwise appears not to tolerate two of these banks at once, so
-auditioning extra sources means adding them here rather than loading a second bank beside this one.
-
-Most vanilla Growl FM tracks trim one to eight seconds off the tail, and the duration the station
-schedules against is the trimmed length, not the file length. Untrimmed trailing silence is played
-in full and delays the next track, so pass end_trim_ms when a source ends quietly.
+Pass end_trim_ms for a source that ends quietly. The station schedules against the trimmed
+length, and untrimmed trailing silence delays the next track.
 
 Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk> [name source_wem end_trim_ms]...
 With no trailing arguments it builds the shipped bank.
@@ -94,9 +86,8 @@ def parse_track(body):
 def retime_automation(body, old_audible_ms, new_audible_ms):
     """Move the clip automation envelopes to the end of the new clip.
 
-    A track carries a fade-out as automation points whose times are floats in SECONDS, inside a
-    variable-length block - so no millisecond field carries them and nothing above rewrites them.
-    Left alone, a cloned track fades to silence at the template's length and plays on inaudibly.
+    Automation times are floats in SECONDS, in a variable-length block, so no millisecond field
+    carries them. A clone that keeps them fades to silence at the template's length.
     """
     count = struct.unpack_from("<I", body, 5)[0]
     pos = 9 + 14 * count

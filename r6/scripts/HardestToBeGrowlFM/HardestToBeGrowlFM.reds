@@ -22,17 +22,16 @@ public func HardestLog(msg: String) -> Void {
 public func HardestLog(msg: String) -> Void {}
 
 // A radio playlist is not TweakDB. The station record holds only its name, icon and index; the
-// track list lives in two cooked resources, and both are patched here as they load:
+// track list lives in two cooked resources, patched here as they load:
 //
-//   eventsmetadata.json          name -> Wwise id, and the duration the station schedules against
+//   eventsmetadata.json              name -> Wwise id, and the duration the station schedules on
 //   cooked_metadata.audio_metadata   the audioRadioTrack rows and each station's track array
 //
-// The Wwise event itself comes from hardest_to_be_growl.bnk, which AudioXL loads.
+// The event itself comes from hardest_to_be_growl.bnk, which AudioXL loads.
 //
-// Each resource is reached two ways, because neither alone is enough. Resource/Load only fires
-// while the resource is loading, and another mod may have pulled it in first - AudioXL loads the
-// cooked metadata itself - in which case the callback never arrives. Asking the depot for it
-// covers that. Both paths run the same patch, and the patch is written to be safe to run twice.
+// Each resource is reached two ways. Resource/Load fires only while a resource is loading, so it
+// never arrives for one another mod has already pulled in. Both paths run the same patch, which
+// is safe to run twice.
 
 public class HardestToBeGrowlFM extends ScriptableService {
 
