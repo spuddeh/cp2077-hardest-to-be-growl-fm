@@ -7,6 +7,7 @@ station.
 
 ## Requirements
 
+- **Phantom Liberty** - the station and the song are both from the expansion
 - [AudioXL](https://www.nexusmods.com/cyberpunk2077/mods/23851) - loads the soundbank
 - [ArchiveXL](https://www.nexusmods.com/cyberpunk2077/mods/4198) - the track title
 - [Codeware](https://www.nexusmods.com/cyberpunk2077/mods/7780)
@@ -23,6 +24,9 @@ game's cooked audio metadata, which this mod patches as it loads - nothing on di
 The soundbank adds the four Wwise objects a radio track needs and points them at the song's
 existing audio file. The segment is parented to Growl FM's own playlist, so the track sits at the
 same levels as the rest of the station.
+
+Full write-up: [docs/how-it-works.md](docs/how-it-works.md) for the method,
+[docs/finding-the-song.md](docs/finding-the-song.md) for how the audio was located.
 
 ## Building the soundbank
 
