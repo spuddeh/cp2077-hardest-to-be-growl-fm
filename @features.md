@@ -7,7 +7,8 @@
 
 ## Planned
 
-- A proper track title. The station currently shows the credits string, which is upper case and
-  names no artist. A formatted one needs its own LocKey, which means an ArchiveXL localization
-  archive.
+- A proper track title: `P.T. Adamczyk, Sora Lion - Hardest to Be`. The station currently shows
+  the credits string, which is upper case and names no artist. The names come from the game's own
+  EP1 credits, and the format matches the thirteen vanilla titles. It needs its own LocKey, which
+  means an ArchiveXL localization archive.
 - Decide whether the song should also be reachable outside a vehicle.
