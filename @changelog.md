@@ -14,5 +14,11 @@
 - `sounds.json`, an AudioXL manifest declaring the bank. It carries an empty `sounds` array
   because AudioXL skips its banks loop for a manifest that has no `sounds` key.
 
+### Fixed
+- The cloned track kept the template's fade-out envelope, so the song faded to silence at 2:46 and
+  then played inaudibly until the station moved on. The automation points are floats in seconds
+  inside a variable-length block, so no millisecond field carried them; `retime_automation` now
+  moves them to the end of the new clip, keeping the fade's length.
+
 ### Notes
 - The track title uses `UI-Credits-HARDEST_TO_BE` as a placeholder LocKey.

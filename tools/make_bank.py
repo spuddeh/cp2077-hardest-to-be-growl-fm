@@ -15,13 +15,17 @@ switch container, for instance. Owning the segment avoids that.
 One bank can carry several tracks. Wwise appears not to tolerate two of these banks at once, so
 auditioning extra sources means adding them here rather than loading a second bank beside this one.
 
-Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk> [name source_wem]...
+Most vanilla Growl FM tracks trim one to eight seconds off the tail, and the duration the station
+schedules against is the trimmed length, not the file length. Untrimmed trailing silence is played
+in full and delays the next track, so pass end_trim_ms when a source ends quietly.
+
+Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk> [name source_wem end_trim_ms]...
 With no trailing arguments it builds the shipped bank.
 """
 import struct
 import sys
 
-SHIPPED = ("mus_radio_12_hardest_to_be", 762143559, None)
+SHIPPED = ("mus_radio_12_hardest_to_be", 762143559, 0.0)
 
 TEMPLATE_EVENT = 18591205    # mus_radio_12_afterlife
 GROWL_PLAYLIST = 375417660   # parents all thirteen Growl FM segments
@@ -87,6 +91,34 @@ def parse_track(body):
     return sources, items
 
 
+def retime_automation(body, old_audible_ms, new_audible_ms):
+    """Move the clip automation envelopes to the end of the new clip.
+
+    A track carries a fade-out as automation points whose times are floats in SECONDS, inside a
+    variable-length block - so no millisecond field carries them and nothing above rewrites them.
+    Left alone, a cloned track fades to silence at the template's length and plays on inaudibly.
+    """
+    count = struct.unpack_from("<I", body, 5)[0]
+    pos = 9 + 14 * count
+    pos += 4 + 44 * struct.unpack_from("<I", body, pos)[0]
+    pos += 4                                   # numSubTrack
+    automation = struct.unpack_from("<I", body, pos)[0]
+    pos += 4
+
+    shift = (new_audible_ms - old_audible_ms) / 1000.0
+    moved = 0
+    for _ in range(automation):
+        points = struct.unpack_from("<I", body, pos + 8)[0]
+        pos += 12
+        for _ in range(points):
+            at = struct.unpack_from("<f", body, pos)[0]
+            if at > 0.0:
+                struct.pack_into("<f", body, pos, at + shift)
+                moved += 1
+            pos += 12
+    return moved
+
+
 def find_source(banks, source_wem):
     """Return (media_size, duration_ms) for a source, from whichever track already reads it."""
     for objects in banks:
@@ -130,8 +162,8 @@ def build(radio_path, music_path, entries, bank_name):
     bank_id = fnv(bank_name)
     hirc = b""
     built = []
-    for event_name, source_wem, source_duration in entries:
-        objects, ids = build_track(radio, music, event_name, source_wem, source_duration, bank_id)
+    for event_name, source_wem, end_trim in entries:
+        objects, ids = build_track(radio, music, event_name, source_wem, end_trim, bank_id)
         hirc += objects
         built.append(ids)
     header = struct.pack("<I", len(entries) * 4) + hirc
@@ -144,7 +176,7 @@ def build(radio_path, music_path, entries, bank_name):
     return data, built
 
 
-def build_track(radio, music, event_name, source_wem, source_duration, bank_id):
+def build_track(radio, music, event_name, source_wem, end_trim, bank_id):
 
     event_type, event_body = radio[TEMPLATE_EVENT]
     assert event_type == 4 and event_body[4] == 1, "template event is not a single-action event"
@@ -161,11 +193,12 @@ def build_track(radio, music, event_name, source_wem, source_duration, bank_id):
     track_type, track_body = radio[tmpl_track_id]
     assert track_type == 11, "template segment does not hold a MusicTrack"
 
-    media_size, found_duration = find_source((radio, music), source_wem)
+    media_size, source_duration = find_source((radio, music), source_wem)
     assert media_size is not None, f"no MusicTrack reads {source_wem}"
-    if source_duration is None:
-        source_duration = found_duration
     assert source_duration, f"no duration for {source_wem}"
+    end_trim = -abs(end_trim)
+    audible = source_duration + end_trim
+    assert audible > 0, f"trim of {end_trim} ms leaves nothing of {source_wem}"
 
     event_id = fnv(event_name)
     action_id = fnv(event_name + "_play")
@@ -185,13 +218,16 @@ def build_track(radio, music, event_name, source_wem, source_duration, bank_id):
     assert replace_u32(track, tmpl_source, source_wem) == 2
     assert replace_u32(track, tmpl_size, media_size) == 1
     assert replace_u32(track, tmpl_segment_id, segment_id) == 1
-    assert replace_f64(track, tmpl_end_trim, 0.0) >= 1
+    assert replace_f64(track, tmpl_end_trim, end_trim) >= 1
     assert replace_f64(track, tmpl_duration, source_duration) >= 1
+
+    moved = retime_automation(track, tmpl_seg_length, audible)
+    assert moved, "template track has no automation points to move"
 
     segment = bytearray(segment_body)
     assert replace_u32(segment, tmpl_segment_id, segment_id) == 1
     assert replace_u32(segment, tmpl_track_id, track_id) == 1
-    assert replace_f64(segment, tmpl_seg_length, source_duration) == 2
+    assert replace_f64(segment, tmpl_seg_length, audible) == 2
 
     action = bytearray(action_body)
     struct.pack_into("<I", action, 0, action_id)
@@ -206,14 +242,15 @@ def build_track(radio, music, event_name, source_wem, source_duration, bank_id):
     for obj_type, body in ((11, track), (10, segment), (3, action), (4, event)):
         objects += bytes([obj_type]) + struct.pack("<I", len(body)) + bytes(body)
     return objects, dict(name=event_name, event=event_id, source=source_wem,
-                         seconds=source_duration / 1000.0, media_size=media_size)
+                         file_ms=source_duration, trim_ms=end_trim,
+                         seconds=audible / 1000.0, media_size=media_size)
 
 
 if __name__ == "__main__":
     radio, music, out = sys.argv[1], sys.argv[2], sys.argv[3]
     rest = sys.argv[4:]
     if rest:
-        entries = [(rest[i], int(rest[i + 1]), None) for i in range(0, len(rest), 2)]
+        entries = [(rest[i], int(rest[i + 1]), float(rest[i + 2])) for i in range(0, len(rest), 3)]
     else:
         entries = [SHIPPED]
     bank_name = out.replace("\\", "/").rsplit("/", 1)[-1].rsplit(".", 1)[0]
@@ -222,4 +259,6 @@ if __name__ == "__main__":
     open(out, "wb").write(data)
     print(f"{out}  {len(data)} bytes  bank {bank_name} ({fnv(bank_name)})")
     for ids in built:
-        print(f"  {ids['name']:28} event {ids['event']:11} source {ids['source']:11} {ids['seconds']:.4f} s")
+        print(f"  {ids['name']:28} event {ids['event']:11} source {ids['source']:11}")
+        print(f"  {'':28} file {ids['file_ms']:.1f} ms, trim {ids['trim_ms']:.1f} ms")
+        print(f"  {'':28} -> m_duration in the .reds must be {ids['seconds']:.4f}")
