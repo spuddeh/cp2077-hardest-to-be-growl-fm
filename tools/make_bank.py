@@ -15,13 +15,13 @@ switch container, for instance. Owning the segment avoids that.
 One bank can carry several tracks. Wwise appears not to tolerate two of these banks at once, so
 auditioning extra sources means adding them here rather than loading a second bank beside this one.
 
-Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk> [name source_wem duration_ms]...
+Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk> [name source_wem]...
 With no trailing arguments it builds the shipped bank.
 """
 import struct
 import sys
 
-SHIPPED = ("mus_radio_12_hardest_to_be", 762143559, 204790.97916666666)
+SHIPPED = ("mus_radio_12_hardest_to_be", 762143559, None)
 
 TEMPLATE_EVENT = 18591205    # mus_radio_12_afterlife
 GROWL_PLAYLIST = 375417660   # parents all thirteen Growl FM segments
@@ -55,6 +55,55 @@ def read_hirc(path):
         objects[obj_id] = (data[pos], data[pos + 5:pos + 5 + size])
         pos += 5 + size
     return objects
+
+
+def parse_track(body):
+    """Read a MusicTrack: its sources, and the playlist item describing each one.
+
+    Field positions depend on the source count - a track carrying two sources pushes everything
+    after the source block along by fourteen bytes - so nothing here may use a fixed offset.
+    """
+    count = struct.unpack_from("<I", body, 5)[0]
+    pos = 9
+    sources = []
+    for _ in range(count):
+        sources.append(dict(plugin=struct.unpack_from("<I", body, pos)[0],
+                            stream=body[pos + 4],
+                            source=struct.unpack_from("<I", body, pos + 5)[0],
+                            media_size=struct.unpack_from("<I", body, pos + 9)[0]))
+        pos += 14
+
+    item_count = struct.unpack_from("<I", body, pos)[0]
+    pos += 4
+
+    items = []
+    for _ in range(item_count):
+        items.append(dict(source=struct.unpack_from("<I", body, pos + 4)[0],
+                          play_at=struct.unpack_from("<d", body, pos + 12)[0],
+                          begin=struct.unpack_from("<d", body, pos + 20)[0],
+                          end=struct.unpack_from("<d", body, pos + 28)[0],
+                          duration=struct.unpack_from("<d", body, pos + 36)[0]))
+        pos += 44
+    return sources, items
+
+
+def find_source(banks, source_wem):
+    """Return (media_size, duration_ms) for a source, from whichever track already reads it."""
+    for objects in banks:
+        for obj_type, body in objects.values():
+            if obj_type != 11 or len(body) < 23:
+                continue
+            try:
+                sources, items = parse_track(body)
+            except struct.error:
+                continue
+            if not any(s["source"] == source_wem for s in sources):
+                continue
+            media = next(s["media_size"] for s in sources if s["source"] == source_wem)
+            for item in items:
+                if item["source"] == source_wem:
+                    return media, item["duration"]
+    return None, None
 
 
 def replace_u32(buf, old, new):
@@ -112,16 +161,11 @@ def build_track(radio, music, event_name, source_wem, source_duration, bank_id):
     track_type, track_body = radio[tmpl_track_id]
     assert track_type == 11, "template segment does not hold a MusicTrack"
 
-    # The prefetch size lives in whichever track already reads this file.
-    media_size = None
-    for objects in (radio, music):
-        for obj_type, body in objects.values():
-            if obj_type == 11 and len(body) > 22 and struct.unpack_from("<I", body, 14)[0] == source_wem:
-                media_size = struct.unpack_from("<I", body, 18)[0]
-                break
-        if media_size is not None:
-            break
-    assert media_size is not None, f"no MusicTrack reads {source_wem}, so its prefetch size is unknown"
+    media_size, found_duration = find_source((radio, music), source_wem)
+    assert media_size is not None, f"no MusicTrack reads {source_wem}"
+    if source_duration is None:
+        source_duration = found_duration
+    assert source_duration, f"no duration for {source_wem}"
 
     event_id = fnv(event_name)
     action_id = fnv(event_name + "_play")
@@ -169,7 +213,7 @@ if __name__ == "__main__":
     radio, music, out = sys.argv[1], sys.argv[2], sys.argv[3]
     rest = sys.argv[4:]
     if rest:
-        entries = [(rest[i], int(rest[i + 1]), float(rest[i + 2])) for i in range(0, len(rest), 3)]
+        entries = [(rest[i], int(rest[i + 1]), None) for i in range(0, len(rest), 2)]
     else:
         entries = [SHIPPED]
     bank_name = out.replace("\\", "/").rsplit("/", 1)[-1].rsplit(".", 1)[0]
