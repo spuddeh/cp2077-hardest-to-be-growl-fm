@@ -24,8 +24,6 @@ The soundbank adds the four Wwise objects a radio track needs and points them at
 existing audio file. The segment is parented to Growl FM's own playlist, so the track sits at the
 same levels as the rest of the station.
 
-Method and measurements: `[[CP2077-Mods/wiki/concepts/adding-a-track-to-a-vanilla-radio-station]]`
-
 ## Building the soundbank
 
 ```

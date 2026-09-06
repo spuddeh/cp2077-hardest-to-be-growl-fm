@@ -1,6 +1,10 @@
 # Claude Code (local only - never commit; these are internal notes)
 CLAUDE.md
 
+# Python
+__pycache__/
+*.pyc
+
 # Editor
 .vscode/
 .history/
