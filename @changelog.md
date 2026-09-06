@@ -11,7 +11,8 @@
 - `HardestToBeGrowlFM.reds`: appends the event to `eventsmetadata.json` with the source's real
   length, and appends an `audioRadioTrack` row plus the station entry to
   `cooked_metadata.audio_metadata`. Both patches are idempotent.
-- `sounds.json`, a banks-only AudioXL manifest.
+- `sounds.json`, an AudioXL manifest declaring the bank. It carries an empty `sounds` array
+  because AudioXL skips its banks loop for a manifest that has no `sounds` key.
 
 ### Notes
 - The track title uses `UI-Credits-HARDEST_TO_BE` as a placeholder LocKey.
