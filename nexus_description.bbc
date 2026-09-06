@@ -50,7 +50,6 @@ Delete those four paths. No save cleanup is needed.
 [*]The station's track list is edited in memory as the game loads it. No vanilla file is replaced, so nothing is overwritten for another mod to disagree with.
 [*]It adds to a stock station rather than creating one, so it does not compete with mods that add their own stations.
 [*]Tested alongside [url=https://www.nexusmods.com/cyberpunk2077/mods/17042]Restore Nebula[/url], which also adds a track to Growl FM. Both appear, because each mod edits the loaded track list rather than replacing a file.
-[*]Better Vehicle Radio keeps its own copy of the station data, so it will not list this track unless you patch that copy. The song still plays; Better Vehicle Radio just cannot manage it.
 [*]The track is added once. Loading a save made before installing is fine.
 [/list]
 [line]
