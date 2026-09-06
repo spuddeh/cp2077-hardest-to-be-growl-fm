@@ -7,7 +7,6 @@ station.
 
 ## Requirements
 
-- **Phantom Liberty** - the station and the song are both from the expansion
 - [AudioXL](https://www.nexusmods.com/cyberpunk2077/mods/23851) - loads the soundbank
 - [ArchiveXL](https://www.nexusmods.com/cyberpunk2077/mods/4198) - the track title
 - [Codeware](https://www.nexusmods.com/cyberpunk2077/mods/7780)
