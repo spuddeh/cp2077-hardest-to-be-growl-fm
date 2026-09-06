@@ -48,32 +48,34 @@ The generator asserts every field it reads, so a game patch that moves a field f
 
 ## Constraints
 
-Each of these produces a bank that loads with `AK_Success` and then plays nothing or plays wrongly.
-A successful load is not evidence that the bank is correct.
+A bank that violates any of these still loads with `AK_Success`, and then plays nothing or plays
+wrongly.
 
-**Own the segment.** An Event aimed at a segment in another bank's hierarchy loads without error
-and stays silent while that hierarchy is inactive, such as a quest's music switch container. The
-segment must be defined in the mod's own bank and parented to the station's playlist.
+**Segment ownership.** A Play action may target a segment in another bank, but that segment only
+sounds while its own hierarchy is active. A segment under a quest's music switch container is
+silent outside that quest. The segment must be defined in the mod's bank and parented to the
+station's playlist.
 
-**Fade-out automation is stored in seconds.** A MusicTrack holds its fade as automation points whose
-times are 32-bit floats in seconds, in a variable-length block after the playlist items. Every other
-duration in the record is a 64-bit double in milliseconds. A clone that keeps the template's points
-fades to silence at the template's length and then plays inaudibly until the declared duration
-elapses.
+**Fade-out automation.** A MusicTrack stores its fade as automation points in a variable-length
+block after the playlist items. Those times are 32-bit floats in seconds; every other duration in
+the record is a 64-bit double in milliseconds. Cloned points therefore keep the template's timing
+and must be moved to the end of the new clip, or the track falls silent at the template's length
+and plays inaudibly until the declared duration elapses.
 
-**Field positions depend on the source count.** A MusicTrack with two sources shifts everything
-after the source block by fourteen bytes. Read the count and walk the record. A fixed offset reads
-the second source's plugin id as a playlist-item count.
+**Field offsets.** A MusicTrack's fields sit after its source block, which is fourteen bytes per
+source. Offsets valid for a single-source track read a two-source track's second plugin id as a
+playlist-item count. Read the source count and walk the record.
 
-**One track per bank.** Three of these banks loaded together silenced each other, including a
-control on a source known to play. A bank holding six events played only the first.
+**One track per bank.** Multiple banks of this kind loaded together are mutually silent, and a bank
+declaring several events sounds only the first. One track per bank is the only configuration
+verified to work.
 
-**The declared duration must be the audible length.** Ten of the thirteen Growl FM tracks trim one
-to eight seconds off the tail, and `minDuration` matches the trimmed length. A raw file length makes
-the station wait out the trailing silence before starting the next track.
+**Declared duration.** `minDuration` must be the audible length, not the file length. Ten of the
+thirteen Growl FM tracks trim one to eight seconds off the tail and declare the trimmed value. An
+untrimmed declaration leaves the station waiting out trailing silence before the next track.
 
-**AudioXL requires a `sounds` key to load banks.** A manifest with `banks` and no `sounds` returns
-before the banks loop, loading nothing and logging nothing. Use `"sounds": []`.
+**AudioXL manifest.** A manifest with `banks` and no `sounds` key returns before the banks loop,
+loading nothing and logging nothing. Include `"sounds": []`.
 
 ## Patching the resources
 
