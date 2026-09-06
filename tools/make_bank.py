@@ -11,16 +11,20 @@ Put extra tracks in one bank rather than loading a second bank beside it.
 Pass end_trim_ms for a source that ends quietly. The station schedules against the trimmed
 length, and untrimmed trailing silence delays the next track.
 
-Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk> [name source_wem end_trim_ms]...
+A segment is parented to Growl FM's playlist unless a parent id follows the trim. An event name is
+never numeric, so a trailing number is read as that entry's parent.
+
+Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk> [name source_wem end_trim_ms [parent]]...
 With no trailing arguments it builds the shipped bank.
 """
 import struct
 import sys
 
-SHIPPED = ("mus_radio_12_hardest_to_be", 762143559, 0.0)
+SHIPPED = ("mus_radio_12_hardest_to_be", 762143559, 0.0, None)
 
 TEMPLATE_EVENT = 18591205    # mus_radio_12_afterlife
 GROWL_PLAYLIST = 375417660   # parents all thirteen Growl FM segments
+ATT_ROCK_PLAYLIST = 845273388
 
 BANK_VERSION = 150
 LANGUAGE_ID = 393239870
@@ -153,8 +157,8 @@ def build(radio_path, music_path, entries, bank_name):
     bank_id = fnv(bank_name)
     hirc = b""
     built = []
-    for event_name, source_wem, end_trim in entries:
-        objects, ids = build_track(radio, music, event_name, source_wem, end_trim, bank_id)
+    for event_name, source_wem, end_trim, parent in entries:
+        objects, ids = build_track(radio, music, event_name, source_wem, end_trim, bank_id, parent)
         hirc += objects
         built.append(ids)
     header = struct.pack("<I", len(entries) * 4) + hirc
@@ -167,7 +171,7 @@ def build(radio_path, music_path, entries, bank_name):
     return data, built
 
 
-def build_track(radio, music, event_name, source_wem, end_trim, bank_id):
+def build_track(radio, music, event_name, source_wem, end_trim, bank_id, parent=None):
 
     event_type, event_body = radio[TEMPLATE_EVENT]
     assert event_type == 4 and event_body[4] == 1, "template event is not a single-action event"
@@ -218,6 +222,8 @@ def build_track(radio, music, event_name, source_wem, end_trim, bank_id):
     segment = bytearray(segment_body)
     assert replace_u32(segment, tmpl_segment_id, segment_id) == 1
     assert replace_u32(segment, tmpl_track_id, track_id) == 1
+    if parent and parent != GROWL_PLAYLIST:
+        assert replace_u32(segment, GROWL_PLAYLIST, parent) == 1
     assert replace_f64(segment, tmpl_seg_length, audible) == 2
 
     action = bytearray(action_body)
@@ -233,7 +239,7 @@ def build_track(radio, music, event_name, source_wem, end_trim, bank_id):
     for obj_type, body in ((11, track), (10, segment), (3, action), (4, event)):
         objects += bytes([obj_type]) + struct.pack("<I", len(body)) + bytes(body)
     return objects, dict(name=event_name, event=event_id, source=source_wem,
-                         file_ms=source_duration, trim_ms=end_trim,
+                         file_ms=source_duration, trim_ms=end_trim, parent=parent or GROWL_PLAYLIST,
                          seconds=audible / 1000.0, media_size=media_size)
 
 
@@ -241,7 +247,16 @@ if __name__ == "__main__":
     radio, music, out = sys.argv[1], sys.argv[2], sys.argv[3]
     rest = sys.argv[4:]
     if rest:
-        entries = [(rest[i], int(rest[i + 1]), float(rest[i + 2])) for i in range(0, len(rest), 3)]
+        entries = []
+        i = 0
+        while i < len(rest):
+            name, wem, trim = rest[i], int(rest[i + 1]), float(rest[i + 2])
+            i += 3
+            parent = None
+            if i < len(rest) and rest[i].isdigit():
+                parent = int(rest[i])
+                i += 1
+            entries.append((name, wem, trim, parent))
     else:
         entries = [SHIPPED]
     bank_name = out.replace("\\", "/").rsplit("/", 1)[-1].rsplit(".", 1)[0]
@@ -252,4 +267,4 @@ if __name__ == "__main__":
     for ids in built:
         print(f"  {ids['name']:28} event {ids['event']:11} source {ids['source']:11}")
         print(f"  {'':28} file {ids['file_ms']:.1f} ms, trim {ids['trim_ms']:.1f} ms")
-        print(f"  {'':28} -> m_duration in the .reds must be {ids['seconds']:.4f}")
+        print(f"  {'':28} parent {ids['parent']}, m_duration {ids['seconds']:.4f}")

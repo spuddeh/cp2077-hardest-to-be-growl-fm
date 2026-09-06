@@ -35,7 +35,8 @@ python tools/make_bank.py <radio.bnk> <cp_music.bnk> \
 
 Both inputs are vanilla banks from `base\sound\soundbanks\`. The generator asserts every field it
 reads, so a game patch that moves anything fails the build rather than producing a bank that loads
-and misbehaves. Pass trailing `<name> <source_wem> <end_trim_ms>` triples to wrap other sources.
+and misbehaves. Pass trailing `<name> <source_wem> <end_trim_ms>` triples to wrap other sources, each
+optionally followed by a parent playlist id.
 
 ## The track title
 
