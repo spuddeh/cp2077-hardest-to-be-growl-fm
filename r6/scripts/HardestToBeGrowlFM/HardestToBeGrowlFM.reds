@@ -28,6 +28,11 @@ public func HardestLog(msg: String) -> Void {}
 //   cooked_metadata.audio_metadata   the audioRadioTrack rows and each station's track array
 //
 // The Wwise event itself comes from hardest_to_be_growl.bnk, which AudioXL loads.
+//
+// Each resource is reached two ways, because neither alone is enough. Resource/Load only fires
+// while the resource is loading, and another mod may have pulled it in first - AudioXL loads the
+// cooked metadata itself - in which case the callback never arrives. Asking the depot for it
+// covers that. Both paths run the same patch, and the patch is written to be safe to run twice.
 
 public class HardestToBeGrowlFM extends ScriptableService {
 
@@ -45,22 +50,49 @@ public class HardestToBeGrowlFM extends ScriptableService {
   private let m_locName: CName = n"UI-Credits-HARDEST_TO_BE";
   private let m_locKey: Uint64 = 94636ul;
 
+  private let m_tokens: array<ref<ResourceToken>>;
+
   private cb func OnLoad() {
-    GameInstance
-      .GetCallbackSystem()
-      .RegisterCallback(n"Resource/Loaded", this, n"OnEventsMetadata")
+    let cb = GameInstance.GetCallbackSystem();
+
+    cb.RegisterCallback(n"Resource/Load", this, n"OnEventsMetadata")
       .AddTarget(ResourceTarget.Path(r"base\\sound\\event\\eventsmetadata.json"));
 
-    GameInstance
-      .GetCallbackSystem()
-      .RegisterCallback(n"Resource/Loaded", this, n"OnCookedMetadata")
-      .AddTarget(
-        ResourceTarget.Path(r"base\\sound\\metadata\\cooked_metadata.audio_metadata")
-      );
+    cb.RegisterCallback(n"Resource/Load", this, n"OnCookedMetadata")
+      .AddTarget(ResourceTarget.Path(r"base\\sound\\metadata\\cooked_metadata.audio_metadata"));
+
+    let depot = GameInstance.GetResourceDepot();
+
+    let events = depot.LoadResource(r"base\\sound\\event\\eventsmetadata.json");
+    if IsDefined(events) {
+      ArrayPush(this.m_tokens, events);
+      events.RegisterCallback(this, n"OnEventsReady");
+    }
+
+    let cooked = depot.LoadResource(r"base\\sound\\metadata\\cooked_metadata.audio_metadata");
+    if IsDefined(cooked) {
+      ArrayPush(this.m_tokens, cooked);
+      cooked.RegisterCallback(this, n"OnCookedReady");
+    }
   }
 
   private cb func OnEventsMetadata(event: ref<ResourceEvent>) {
-    let resource = event.GetResource() as JsonResource;
+    this.PatchEvents(event.GetResource() as JsonResource);
+  }
+
+  private cb func OnEventsReady(token: ref<ResourceToken>) {
+    this.PatchEvents(token.GetResource() as JsonResource);
+  }
+
+  private cb func OnCookedMetadata(event: ref<ResourceEvent>) {
+    this.PatchStation(event.GetResource() as audioCookedMetadataResource);
+  }
+
+  private cb func OnCookedReady(token: ref<ResourceToken>) {
+    this.PatchStation(token.GetResource() as audioCookedMetadataResource);
+  }
+
+  private func PatchEvents(resource: ref<JsonResource>) -> Void {
     if !IsDefined(resource) { return; }
 
     let events = resource.root as audioAudioEventArray;
@@ -84,8 +116,7 @@ public class HardestToBeGrowlFM extends ScriptableService {
     HardestLog(s"event registered: \(this.m_trackEvent) wwiseId \(this.m_wwiseId) \(this.m_duration)s");
   }
 
-  private cb func OnCookedMetadata(event: ref<ResourceEvent>) {
-    let cooked = event.GetResource() as audioCookedMetadataResource;
+  private func PatchStation(cooked: ref<audioCookedMetadataResource>) -> Void {
     if !IsDefined(cooked) { return; }
 
     let station: Bool = false;
@@ -96,23 +127,30 @@ public class HardestToBeGrowlFM extends ScriptableService {
       if IsDefined(stationData) && Equals(stationData.name, this.m_station) {
         if !ArrayContains(stationData.tracks, this.m_trackEvent) {
           ArrayPush(stationData.tracks, this.m_trackEvent);
+          HardestLog(s"\(this.m_station) now lists \(ArraySize(stationData.tracks)) tracks");
         }
-        HardestLog(s"\(this.m_station) now lists \(ArraySize(stationData.tracks)) tracks");
         station = true;
       }
 
       let trackData = entry as audioRadioTracksMetadata;
-      if IsDefined(trackData) && !this.HasTrack(trackData) {
-        let row: audioRadioTrack;
-        row.trackEventName = this.m_trackEvent;
-        row.localizationKey = this.m_locName;
-        row.primaryLocKey = this.m_locKey;
-        row.isStreamingFriendly = true;
-        ArrayPush(trackData.radioTracks, row);
+      if IsDefined(trackData) {
+        if !this.HasTrack(trackData) {
+          let row: audioRadioTrack;
+          row.trackEventName = this.m_trackEvent;
+          row.localizationKey = this.m_locName;
+          row.primaryLocKey = this.m_locKey;
+          row.isStreamingFriendly = true;
+          ArrayPush(trackData.radioTracks, row);
+          HardestLog(s"track row added, \(ArraySize(trackData.radioTracks)) rows total");
+        }
         tracks = true;
       }
 
       if station && tracks { break; }
+    }
+
+    if !station {
+      HardestLog(s"\(this.m_station) not found in this metadata resource");
     }
   }
 
