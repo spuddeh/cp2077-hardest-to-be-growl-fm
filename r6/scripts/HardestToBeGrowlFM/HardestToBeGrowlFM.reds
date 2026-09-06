@@ -1,7 +1,7 @@
 // ======================================================================================
 // Mod Name: Hardest to Be on Growl FM
 // Author: Spuddeh
-// Description: Adds the Alex heart-to-heart jukebox song to Growl FM's playlist.
+// Description: Adds Hardest to Be to Growl FM's playlist, from the game's own audio.
 // File Version: 0.1.0
 // Credits: Restore Nebula by ArmanIII, for the runtime metadata patch; AudioXL by DigitalVixen.
 // ======================================================================================
@@ -35,9 +35,9 @@ public class HardestToBeGrowlFM extends ScriptableService {
   private let m_trackEvent: CName = n"mus_radio_12_hardest_to_be";
   private let m_wwiseId: Uint32 = 706539828u;
 
-  // The source file runs 206897.3958 ms. The station uses this to know when to queue the next
+  // The source file runs 204790.9792 ms. The station uses this to know when to queue the next
   // track, so it must match the segment length in the bank.
-  private let m_duration: Float = 206.8974;
+  private let m_duration: Float = 204.791;
 
   private let m_station: CName = n"radio_station_12_growl_fm";
 

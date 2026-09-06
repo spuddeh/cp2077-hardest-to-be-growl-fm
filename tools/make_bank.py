@@ -1,5 +1,8 @@
 r"""Build a soundbank that plays a source file the game already ships as a Growl FM radio track.
 
+The song is 762143559.wem, the vocal take that plays in the apartment hangout playlist. The
+instrumental cue from the Alex scene, 528262674.wem, is a different recording and is not used here.
+
 A vanilla radio track is an Event whose Play action targets a MusicSegment holding a MusicTrack,
 with the segment parented to the station's own playlist. This clones that whole shape from
 mus_radio_12_afterlife and retargets it, so every field not named below already carries a Growl FM
@@ -9,13 +12,16 @@ The clone is what makes it work. An Event that points straight at a segment insi
 hierarchy loads without error and plays nothing when that hierarchy is not live - a quest's music
 switch container, for instance. Owning the segment avoids that.
 
-Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk> [event_name source_wem duration_ms]
+One bank can carry several tracks. Wwise appears not to tolerate two of these banks at once, so
+auditioning extra sources means adding them here rather than loading a second bank beside this one.
+
+Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk> [name source_wem duration_ms]...
 With no trailing arguments it builds the shipped bank.
 """
 import struct
 import sys
 
-SHIPPED = ("mus_radio_12_hardest_to_be", 528262674, 206897.3958333333)
+SHIPPED = ("mus_radio_12_hardest_to_be", 762143559, 204790.97916666666)
 
 TEMPLATE_EVENT = 18591205    # mus_radio_12_afterlife
 GROWL_PLAYLIST = 375417660   # parents all thirteen Growl FM segments
@@ -69,8 +75,27 @@ def replace_f64(buf, old, new):
     return hits
 
 
-def build(radio_path, music_path, event_name, source_wem, source_duration, bank_name):
+def build(radio_path, music_path, entries, bank_name):
     radio = read_hirc(radio_path)
+    music = read_hirc(music_path)
+    bank_id = fnv(bank_name)
+    hirc = b""
+    built = []
+    for event_name, source_wem, source_duration in entries:
+        objects, ids = build_track(radio, music, event_name, source_wem, source_duration, bank_id)
+        hirc += objects
+        built.append(ids)
+    header = struct.pack("<I", len(entries) * 4) + hirc
+
+    bkhd = struct.pack("<IIIIII", BANK_VERSION, bank_id, LANGUAGE_ID, 16, 476, 0)
+    bkhd += struct.pack("<IIII", bank_id, len(entries), 0, 0)
+
+    data = b"BKHD" + struct.pack("<I", len(bkhd)) + bkhd
+    data += b"HIRC" + struct.pack("<I", len(header)) + header
+    return data, built
+
+
+def build_track(radio, music, event_name, source_wem, source_duration, bank_id):
 
     event_type, event_body = radio[TEMPLATE_EVENT]
     assert event_type == 4 and event_body[4] == 1, "template event is not a single-action event"
@@ -89,7 +114,7 @@ def build(radio_path, music_path, event_name, source_wem, source_duration, bank_
 
     # The prefetch size lives in whichever track already reads this file.
     media_size = None
-    for objects in (radio, read_hirc(music_path)):
+    for objects in (radio, music):
         for obj_type, body in objects.values():
             if obj_type == 11 and len(body) > 22 and struct.unpack_from("<I", body, 14)[0] == source_wem:
                 media_size = struct.unpack_from("<I", body, 18)[0]
@@ -98,7 +123,6 @@ def build(radio_path, music_path, event_name, source_wem, source_duration, bank_
             break
     assert media_size is not None, f"no MusicTrack reads {source_wem}, so its prefetch size is unknown"
 
-    bank_id = fnv(bank_name)
     event_id = fnv(event_name)
     action_id = fnv(event_name + "_play")
     segment_id = fnv(event_name + "_segment")
@@ -134,30 +158,24 @@ def build(radio_path, music_path, event_name, source_wem, source_duration, bank_
     struct.pack_into("<I", event, 0, event_id)
     struct.pack_into("<I", event, 5, action_id)
 
-    hirc = struct.pack("<I", 4)
+    objects = b""
     for obj_type, body in ((11, track), (10, segment), (3, action), (4, event)):
-        hirc += bytes([obj_type]) + struct.pack("<I", len(body)) + bytes(body)
-
-    bkhd = struct.pack("<IIIIII", BANK_VERSION, bank_id, LANGUAGE_ID, 16, 476, 0)
-    bkhd += struct.pack("<IIII", bank_id, event_id, segment_id, track_id)
-
-    data = b"BKHD" + struct.pack("<I", len(bkhd)) + bkhd
-    data += b"HIRC" + struct.pack("<I", len(hirc)) + hirc
-    return data, dict(bank=bank_id, event=event_id, action=action_id,
-                      segment=segment_id, track=track_id, media_size=media_size)
+        objects += bytes([obj_type]) + struct.pack("<I", len(body)) + bytes(body)
+    return objects, dict(name=event_name, event=event_id, source=source_wem,
+                         seconds=source_duration / 1000.0, media_size=media_size)
 
 
 if __name__ == "__main__":
     radio, music, out = sys.argv[1], sys.argv[2], sys.argv[3]
-    if len(sys.argv) > 4:
-        event_name, source_wem, source_duration = sys.argv[4], int(sys.argv[5]), float(sys.argv[6])
+    rest = sys.argv[4:]
+    if rest:
+        entries = [(rest[i], int(rest[i + 1]), float(rest[i + 2])) for i in range(0, len(rest), 3)]
     else:
-        event_name, source_wem, source_duration = SHIPPED
+        entries = [SHIPPED]
     bank_name = out.replace("\\", "/").rsplit("/", 1)[-1].rsplit(".", 1)[0]
 
-    data, ids = build(radio, music, event_name, source_wem, source_duration, bank_name)
+    data, built = build(radio, music, entries, bank_name)
     open(out, "wb").write(data)
-    print(f"{out}  {len(data)} bytes")
-    print(f"  bank  {bank_name} ({ids['bank']})")
-    print(f"  event {event_name} ({ids['event']})")
-    print(f"  source {source_wem}, {source_duration / 1000.0:.4f} s")
+    print(f"{out}  {len(data)} bytes  bank {bank_name} ({fnv(bank_name)})")
+    for ids in built:
+        print(f"  {ids['name']:28} event {ids['event']:11} source {ids['source']:11} {ids['seconds']:.4f} s")
