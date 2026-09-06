@@ -1,29 +1,27 @@
-r"""Build the soundbank that puts Hardest to Be on Growl FM.
+r"""Build a soundbank that plays a source file the game already ships as a Growl FM radio track.
 
-The song is already in the game as base\sound\soundbanks\media\528262674.wem, but the only
-node that touches it is a seven-second outro sting for the Alex heart-to-heart scene. This bank
-adds the four Wwise objects a radio track needs - a MusicTrack over the whole file, a MusicSegment
-holding it, and an Event with a Play action - and parents the segment to Growl FM's own playlist so
-the mix matches the other thirteen tracks.
+A vanilla radio track is an Event whose Play action targets a MusicSegment holding a MusicTrack,
+with the segment parented to the station's own playlist. This clones that whole shape from
+mus_radio_12_afterlife and retargets it, so every field not named below already carries a Growl FM
+track's settings.
 
-The segment and track are cloned from mus_radio_12_afterlife rather than written from scratch, so
-every field this script does not touch already carries a Growl FM track's settings.
+The clone is what makes it work. An Event that points straight at a segment inside another bank's
+hierarchy loads without error and plays nothing when that hierarchy is not live - a quest's music
+switch container, for instance. Owning the segment avoids that.
 
-Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk>
+Run:  python make_bank.py <radio.bnk> <cp_music.bnk> <out.bnk> [event_name source_wem duration_ms]
+With no trailing arguments it builds the shipped bank.
 """
 import struct
 import sys
 
-BANK_NAME  = "hardest_to_be_growl"
-EVENT_NAME = "mus_radio_12_hardest_to_be"
+SHIPPED = ("mus_radio_12_hardest_to_be", 528262674, 206897.3958333333)
 
-TEMPLATE_EVENT   = 18591205    # mus_radio_12_afterlife
-GROWL_PLAYLIST   = 375417660   # parents all thirteen Growl FM segments
-SOURCE_WEM       = 528262674
-SOURCE_TRACK     = 491378111   # the outro sting, read for its media size and true duration
+TEMPLATE_EVENT = 18591205    # mus_radio_12_afterlife
+GROWL_PLAYLIST = 375417660   # parents all thirteen Growl FM segments
 
 BANK_VERSION = 150
-LANGUAGE_ID  = 393239870
+LANGUAGE_ID = 393239870
 
 
 def fnv(name):
@@ -38,26 +36,19 @@ def read_hirc(path):
     data = open(path, "rb").read()
     offset = 0
     while offset < len(data) - 8:
-        tag = data[offset:offset + 4]
-        length = struct.unpack_from("<I", data, offset + 4)[0]
-        if tag == b"HIRC":
+        if data[offset:offset + 4] == b"HIRC":
             break
-        offset += 8 + length
+        offset += 8 + struct.unpack_from("<I", data, offset + 4)[0]
     pos = offset + 8
     count = struct.unpack_from("<I", data, pos)[0]
     pos += 4
     objects = {}
     for _ in range(count):
-        obj_type = data[pos]
         size = struct.unpack_from("<I", data, pos + 1)[0]
         obj_id = struct.unpack_from("<I", data, pos + 5)[0]
-        objects[obj_id] = (obj_type, data[pos + 5:pos + 5 + size])
+        objects[obj_id] = (data[pos], data[pos + 5:pos + 5 + size])
         pos += 5 + size
     return objects
-
-
-def put_u32(buf, offset, value):
-    struct.pack_into("<I", buf, offset, value)
 
 
 def replace_u32(buf, old, new):
@@ -78,9 +69,8 @@ def replace_f64(buf, old, new):
     return hits
 
 
-def build(radio_path, music_path):
+def build(radio_path, music_path, event_name, source_wem, source_duration, bank_name):
     radio = read_hirc(radio_path)
-    music = read_hirc(music_path)
 
     event_type, event_body = radio[TEMPLATE_EVENT]
     assert event_type == 4 and event_body[4] == 1, "template event is not a single-action event"
@@ -91,36 +81,41 @@ def build(radio_path, music_path):
     tmpl_segment_id = struct.unpack_from("<I", action_body, 6)[0]
     segment_type, segment_body = radio[tmpl_segment_id]
     assert segment_type == 10, "template Play action does not target a MusicSegment"
+    assert struct.unpack_from("<I", segment_body, 13)[0] == GROWL_PLAYLIST
 
     tmpl_track_id = struct.unpack_from("<I", segment_body, 40)[0]
     track_type, track_body = radio[tmpl_track_id]
     assert track_type == 11, "template segment does not hold a MusicTrack"
-    assert struct.unpack_from("<I", segment_body, 13)[0] == GROWL_PLAYLIST
 
-    # The sting carries the file's real length; play it whole, so no trim and no offset.
-    _, sting = music[SOURCE_TRACK]
-    assert struct.unpack_from("<I", sting, 14)[0] == SOURCE_WEM
-    source_size = struct.unpack_from("<I", sting, 18)[0]
-    source_duration = struct.unpack_from("<d", sting, 63)[0]
+    # The prefetch size lives in whichever track already reads this file.
+    media_size = None
+    for objects in (radio, read_hirc(music_path)):
+        for obj_type, body in objects.values():
+            if obj_type == 11 and len(body) > 22 and struct.unpack_from("<I", body, 14)[0] == source_wem:
+                media_size = struct.unpack_from("<I", body, 18)[0]
+                break
+        if media_size is not None:
+            break
+    assert media_size is not None, f"no MusicTrack reads {source_wem}, so its prefetch size is unknown"
 
-    bank_id    = fnv(BANK_NAME)
-    event_id   = fnv(EVENT_NAME)
-    action_id  = fnv(EVENT_NAME + "_play")
-    segment_id = fnv(EVENT_NAME + "_segment")
-    track_id   = fnv(EVENT_NAME + "_track")
+    bank_id = fnv(bank_name)
+    event_id = fnv(event_name)
+    action_id = fnv(event_name + "_play")
+    segment_id = fnv(event_name + "_segment")
+    track_id = fnv(event_name + "_track")
 
-    tmpl_source     = struct.unpack_from("<I", track_body, 14)[0]
-    tmpl_size       = struct.unpack_from("<I", track_body, 18)[0]
-    tmpl_end_trim   = struct.unpack_from("<d", track_body, 55)[0]
-    tmpl_duration   = struct.unpack_from("<d", track_body, 63)[0]
+    tmpl_source = struct.unpack_from("<I", track_body, 14)[0]
+    tmpl_size = struct.unpack_from("<I", track_body, 18)[0]
+    tmpl_end_trim = struct.unpack_from("<d", track_body, 55)[0]
+    tmpl_duration = struct.unpack_from("<d", track_body, 63)[0]
     tmpl_seg_length = struct.unpack_from("<d", segment_body, 71)[0]
-    playable        = tmpl_duration + tmpl_end_trim
-    assert abs(tmpl_seg_length - playable) < 0.001, "template segment and track disagree on length"
+    assert abs(tmpl_seg_length - (tmpl_duration + tmpl_end_trim)) < 0.001, \
+        "template segment and track disagree on length"
 
     track = bytearray(track_body)
     assert replace_u32(track, tmpl_track_id, track_id) == 1
-    assert replace_u32(track, tmpl_source, SOURCE_WEM) == 2
-    assert replace_u32(track, tmpl_size, source_size) == 1
+    assert replace_u32(track, tmpl_source, source_wem) == 2
+    assert replace_u32(track, tmpl_size, media_size) == 1
     assert replace_u32(track, tmpl_segment_id, segment_id) == 1
     assert replace_f64(track, tmpl_end_trim, 0.0) >= 1
     assert replace_f64(track, tmpl_duration, source_duration) >= 1
@@ -131,13 +126,13 @@ def build(radio_path, music_path):
     assert replace_f64(segment, tmpl_seg_length, source_duration) == 2
 
     action = bytearray(action_body)
-    put_u32(action, 0, action_id)
-    put_u32(action, 6, segment_id)
-    put_u32(action, 14, bank_id)
+    struct.pack_into("<I", action, 0, action_id)
+    struct.pack_into("<I", action, 6, segment_id)
+    struct.pack_into("<I", action, 14, bank_id)
 
     event = bytearray(event_body)
-    put_u32(event, 0, event_id)
-    put_u32(event, 5, action_id)
+    struct.pack_into("<I", event, 0, event_id)
+    struct.pack_into("<I", event, 5, action_id)
 
     hirc = struct.pack("<I", 4)
     for obj_type, body in ((11, track), (10, segment), (3, action), (4, event)):
@@ -149,15 +144,20 @@ def build(radio_path, music_path):
     data = b"BKHD" + struct.pack("<I", len(bkhd)) + bkhd
     data += b"HIRC" + struct.pack("<I", len(hirc)) + hirc
     return data, dict(bank=bank_id, event=event_id, action=action_id,
-                      segment=segment_id, track=track_id,
-                      duration_ms=source_duration, media_size=source_size)
+                      segment=segment_id, track=track_id, media_size=media_size)
 
 
 if __name__ == "__main__":
     radio, music, out = sys.argv[1], sys.argv[2], sys.argv[3]
-    data, ids = build(radio, music)
+    if len(sys.argv) > 4:
+        event_name, source_wem, source_duration = sys.argv[4], int(sys.argv[5]), float(sys.argv[6])
+    else:
+        event_name, source_wem, source_duration = SHIPPED
+    bank_name = out.replace("\\", "/").rsplit("/", 1)[-1].rsplit(".", 1)[0]
+
+    data, ids = build(radio, music, event_name, source_wem, source_duration, bank_name)
     open(out, "wb").write(data)
     print(f"{out}  {len(data)} bytes")
-    for k, v in ids.items():
-        print(f"  {k:11} {v}")
-    print(f"  duration for eventsmetadata: {ids['duration_ms'] / 1000.0:.4f} s")
+    print(f"  bank  {bank_name} ({ids['bank']})")
+    print(f"  event {event_name} ({ids['event']})")
+    print(f"  source {source_wem}, {source_duration / 1000.0:.4f} s")

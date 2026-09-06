@@ -8,6 +8,19 @@
 
 module HardestToBeGrowlFM
 
+// RedLogger's signature ships once, inside the plugin, so callers cannot collide. Without
+// RedLogger installed this compiles to nothing.
+@if(ModuleExists("RedLogger"))
+import RedLogger.*
+
+@if(ModuleExists("RedLogger"))
+public func HardestLog(msg: String) -> Void {
+  RedLog.Append("HardestToBeGrowlFM", msg);
+}
+
+@if(!ModuleExists("RedLogger"))
+public func HardestLog(msg: String) -> Void {}
+
 // A radio playlist is not TweakDB. The station record holds only its name, icon and index; the
 // track list lives in two cooked resources, and both are patched here as they load:
 //
@@ -68,6 +81,7 @@ public class HardestToBeGrowlFM extends ScriptableService {
     row.maxDuration = this.m_duration;
     row.tags = [n"GrowlFM"];
     ArrayPush(events.events, row);
+    HardestLog(s"event registered: \(this.m_trackEvent) wwiseId \(this.m_wwiseId) \(this.m_duration)s");
   }
 
   private cb func OnCookedMetadata(event: ref<ResourceEvent>) {
@@ -83,6 +97,7 @@ public class HardestToBeGrowlFM extends ScriptableService {
         if !ArrayContains(stationData.tracks, this.m_trackEvent) {
           ArrayPush(stationData.tracks, this.m_trackEvent);
         }
+        HardestLog(s"\(this.m_station) now lists \(ArraySize(stationData.tracks)) tracks");
         station = true;
       }
 
