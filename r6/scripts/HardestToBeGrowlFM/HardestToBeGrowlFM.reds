@@ -46,10 +46,11 @@ public class HardestToBeGrowlFM extends ScriptableService {
   private let m_station: CName = n"radio_station_12_growl_fm";
 
   // The title, shipped in this mod's archive. ArchiveXL registers an entry whose primaryKey is 0
-  // twice: once under FNV1a32 of the secondary key, once under FNV1a64 with the string dropped.
-  // primaryLocKey is the 64-bit one, so it is that hash of m_locName and nothing else.
+  // under both FNV1a32 of the secondary key and FNV1a64 of it, so either resolves the string.
+  // This uses the 32-bit one: every vanilla radio track's key fits in 32 bits, and anything
+  // reading the key as the low half of a CName sees the whole value only at that width.
   private let m_locName: CName = n"Gameplay-Devices-Radio_tracks-growl_hardest_to_be";
-  private let m_locKey: Uint64 = 9211171323512836826ul;
+  private let m_locKey: Uint64 = 1995743706ul;
 
   private let m_tokens: array<ref<ResourceToken>>;
 

@@ -98,8 +98,11 @@ from the console and never on the radio.
 
 The station displays `Artist - Title` from an onscreens entry shipped in this mod's archive. Its
 `primaryKey` is `0`, so ArchiveXL derives the keys: it registers the entry under `FNV1a32` of the
-secondary key, and again under `FNV1a64` with the string cleared. `audioRadioTrack.primaryLocKey` is
-a `Uint64`, so it takes the 64-bit hash.
+secondary key, and again under `FNV1a64` with the string cleared. Either resolves the string.
+
+`audioRadioTrack.primaryLocKey` is a `Uint64`, but **use the 32-bit hash**. Every vanilla radio
+track's key fits in 32 bits, and the radio reports the current track as a CName built from that key,
+so anything matching on the CName's `hash_lo` sees a 64-bit key truncated to its low half.
 
 Vanilla does not localize most track titles. Japanese localizes the station name but leaves titles
 in Latin script, identical to English. Russian transliterates the artist and separates it with a
