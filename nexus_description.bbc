@@ -2,11 +2,11 @@
 [i]Puts P.T. Adamczyk and Sora Lion's song on 89.7 Growl FM, where it always should have been.[/i][/center]
 [line]
 [color=#ffff00][size=5][b]Description[/b][/size][/color]
-[b]Hardest to Be[/b] is one of the best pieces of music in Phantom Liberty, and you hear it once. It plays during a single quest, and then it is gone. Every other song on Growl FM you can put on in a car whenever you feel like it. Not that one.
+[b]Hardest to Be[/b] is one of the best pieces of music in Phantom Liberty, and you cannot choose to listen to it. It turns up during a quest, and on the music that plays around your apartment, but it is on no radio station. Every other song on Growl FM you can put on in a car whenever you feel like it. Not that one.
 
-That annoyed me enough to go looking, and it turns out the full recording, vocals and all, is sitting in your game files already. It is used by the apartment hangouts and by nothing else. Six of the seven tracks in that hangout playlist are ordinary radio songs from other stations. This one is the only one that never made it onto a dial.
+That annoyed me enough to go looking, and it turns out the full recording, vocals and all, is sitting in your game files already, in the playlist the game uses for apartment hangouts. Six of the seven tracks in that playlist are ordinary radio songs from other stations. This one is the only one that never made it onto a dial.
 
-So this mod puts it on Growl FM. It comes up in rotation like any other track on the station, at the same volume as the rest, with the artist and title on the HUD.
+So this mod puts it on Growl FM. It comes up in rotation like any other track on the station, with the artist and title on the HUD.
 
 [color=#ffff00][size=4][b]It ships no audio[/b][/size][/color]
 The song is already installed on your machine. This mod is a few hundred bytes of soundbank and a script that tells the station the track exists. It does not contain, copy or redistribute any music, and it does not overwrite a single vanilla file.
@@ -16,7 +16,7 @@ The song is already installed on your machine. This mod is a few hundred bytes o
 [list]
 [*][b]Plays in normal rotation.[/b] Nothing to activate and nothing to configure. Get in a car, tune to 89.7, and wait for it like any other song.
 [*][b]The full song.[/b] Not the short section from the quest scene, and not the instrumental.
-[*][b]Correct levels.[/b] The track hangs off Growl FM's own playlist, so it is mixed exactly like the station's other thirteen.
+[*][b]Station mixing.[/b] The track hangs off Growl FM's own playlist, so it takes the station's own mix rather than a level of my choosing.
 [*][b]Named properly.[/b] Shows as [font=Courier New]P.T. Adamczyk, Sora Lion - Hardest to Be[/font], with the artist credits taken from the game's own credits roll.
 [*][b]All languages.[/b] The title is registered for every language the game ships.
 [*][b]Safe to remove.[/b] Nothing is written to your save and no vanilla file is touched. Delete the folders and the station goes back to thirteen tracks.
@@ -47,8 +47,8 @@ Delete those four paths. No save cleanup is needed.
 [line]
 [color=#ffff00][size=5][b]Compatibility[/b][/size][/color]
 [list]
-[*]The station's track list is edited in memory as the game loads it, so no vanilla file is replaced and nothing conflicts with other mods that touch radio.
-[*]Works alongside mods that add new stations, such as RadioXL and RadioExt. Those build their own stations; this one adds to a stock one.
+[*]The station's track list is edited in memory as the game loads it. No vanilla file is replaced, so nothing is overwritten for another mod to disagree with.
+[*]It adds to a stock station rather than creating one, so it does not compete with mods that add their own stations.
 [*]The track is added once. Loading a save made before installing is fine.
 [/list]
 [line]

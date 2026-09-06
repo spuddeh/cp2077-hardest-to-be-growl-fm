@@ -12,5 +12,5 @@
 
 - Russian and Ukrainian transliterate a Latin-script artist name in vanilla, and this ships the
   Latin string to every language. A native speaker could supply either.
-- The hangout playlist holds six more full-length tracks that no station plays. Each is a
-  candidate for the same treatment.
+- The same technique fits any shipped `.wem`. The other six tracks in the hangout playlist are
+  already on stations, so there is nothing else in that playlist to restore.
