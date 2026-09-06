@@ -1,0 +1,25 @@
+# The track title. Vanilla leaves a Growl FM title in Latin script for most languages, so
+# every language points at one file; Russian and Ukrainian do transliterate the artist, so
+# either can be repointed at its own file without changing anything else.
+# en-us is listed first and is therefore ArchiveXL's fallback.
+localization:
+  onscreens:
+    en-us: mod\hardesttobegrowlfm\localization\onscreens.json
+    ar-ar: mod\hardesttobegrowlfm\localization\onscreens.json
+    cz-cz: mod\hardesttobegrowlfm\localization\onscreens.json
+    de-de: mod\hardesttobegrowlfm\localization\onscreens.json
+    es-es: mod\hardesttobegrowlfm\localization\onscreens.json
+    es-mx: mod\hardesttobegrowlfm\localization\onscreens.json
+    fr-fr: mod\hardesttobegrowlfm\localization\onscreens.json
+    hu-hu: mod\hardesttobegrowlfm\localization\onscreens.json
+    it-it: mod\hardesttobegrowlfm\localization\onscreens.json
+    jp-jp: mod\hardesttobegrowlfm\localization\onscreens.json
+    kr-kr: mod\hardesttobegrowlfm\localization\onscreens.json
+    pl-pl: mod\hardesttobegrowlfm\localization\onscreens.json
+    pt-br: mod\hardesttobegrowlfm\localization\onscreens.json
+    ru-ru: mod\hardesttobegrowlfm\localization\onscreens.json
+    th-th: mod\hardesttobegrowlfm\localization\onscreens.json
+    tr-tr: mod\hardesttobegrowlfm\localization\onscreens.json
+    ua-ua: mod\hardesttobegrowlfm\localization\onscreens.json
+    zh-cn: mod\hardesttobegrowlfm\localization\onscreens.json
+    zh-tw: mod\hardesttobegrowlfm\localization\onscreens.json

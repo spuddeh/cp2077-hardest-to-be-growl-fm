@@ -20,5 +20,8 @@
   inside a variable-length block, so no millisecond field carried them; `retime_automation` now
   moves them to the end of the new clip, keeping the fade's length.
 
-### Notes
-- The track title uses `UI-Credits-HARDEST_TO_BE` as a placeholder LocKey.
+### Added, continued
+- `HardestToBeGrowlFM.archive` and its `.xl`: one onscreens entry giving the track title
+  `P.T. Adamczyk, Sora Lion - Hardest to Be`, with all nineteen languages mapped to it. The artist
+  names come from the game's own Phantom Liberty credits, and the format matches the thirteen
+  vanilla Growl FM titles.

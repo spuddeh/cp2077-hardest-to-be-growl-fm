@@ -46,9 +46,11 @@ public class HardestToBeGrowlFM extends ScriptableService {
 
   private let m_station: CName = n"radio_station_12_growl_fm";
 
-  // Placeholder title, taken from the credits. A properly formatted string needs its own LocKey.
-  private let m_locName: CName = n"UI-Credits-HARDEST_TO_BE";
-  private let m_locKey: Uint64 = 94636ul;
+  // The title, shipped in this mod's archive. ArchiveXL registers an entry whose primaryKey is 0
+  // twice: once under FNV1a32 of the secondary key, once under FNV1a64 with the string dropped.
+  // primaryLocKey is the 64-bit one, so it is that hash of m_locName and nothing else.
+  private let m_locName: CName = n"Gameplay-Devices-Radio_tracks-growl_hardest_to_be";
+  private let m_locKey: Uint64 = 9211171323512836826ul;
 
   private let m_tokens: array<ref<ResourceToken>>;
 

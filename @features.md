@@ -6,12 +6,11 @@
   music.
 - The vocal recording is used, the one from the hangout playlist. The instrumental cue from the
   Alex scene is a different file and is not played.
+- The station shows `P.T. Adamczyk, Sora Lion - Hardest to Be`, in all nineteen languages.
 
 ## Planned
 
-- A proper track title: `P.T. Adamczyk, Sora Lion - Hardest to Be`. The station currently shows
-  the credits string, which is upper case and names no artist. The names come from the game's own
-  EP1 credits, and the format matches the thirteen vanilla titles. It needs its own LocKey, which
-  means an ArchiveXL localization archive.
+- Russian and Ukrainian transliterate a Latin-script artist name in vanilla, and this ships the
+  Latin string to every language. A native speaker could supply either.
 - The hangout playlist holds six more full-length tracks that no station plays. Each is a
   candidate for the same treatment.
