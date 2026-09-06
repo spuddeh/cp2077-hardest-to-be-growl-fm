@@ -51,11 +51,6 @@ The generator asserts every field it reads, so a game patch that moves a field f
 A bank that violates any of these still loads with `AK_Success`, and then plays nothing or plays
 wrongly.
 
-**Segment ownership.** A Play action may target a segment in another bank, but that segment only
-sounds while its own hierarchy is active. A segment under a quest's music switch container is
-silent outside that quest. The segment must be defined in the mod's bank and parented to the
-station's playlist.
-
 **Fade-out automation.** A MusicTrack stores its fade as automation points in a variable-length
 block after the playlist items. Those times are 32-bit floats in seconds; every other duration in
 the record is a 64-bit double in milliseconds. Cloned points therefore keep the template's timing
@@ -66,23 +61,29 @@ and plays inaudibly until the declared duration elapses.
 source. Offsets valid for a single-source track read a two-source track's second plugin id as a
 playlist-item count. Read the source count and walk the record.
 
-**One track per bank.** A bank declaring several events sounds only the first, whatever the rest
-declare. A three-event bank built from one source, with the second entry's segment parented to a
-different station's playlist and the third to the same one, played only the first entry. Holding
-the source constant rules out the audio, and the second entry rules out a per-playlist limit.
-
-This is a defect in the generated bank rather than an engine rule. `radio.bnk` holds 590 events and
-`cp_music.bnk` 2246, and both interleave object types the same way the generator does, so neither
-event count nor ordering is the cause. The remaining candidate is the nonzero `uInMemoryMediaSize`
-each generated track declares while the bank carries no `DIDX` or `DATA` chunk to hold that
-prefetch.
-
 **Declared duration.** `minDuration` must be the audible length, not the file length. Ten of the
 thirteen Growl FM tracks trim one to eight seconds off the tail and declare the trimmed value. An
 untrimmed declaration leaves the station waiting out trailing silence before the next track.
 
 **AudioXL manifest.** A manifest with `banks` and no `sounds` key returns before the banks loop,
 loading nothing and logging nothing. Include `"sounds": []`.
+
+## Testing an event by name
+
+`GameInstance.GetAudioSystem().Play(name)` resolves a CName to a Wwise id through
+`eventsmetadata.json`. An event that exists in a loaded bank but has no row in that table cannot be
+posted by name and fails silently. Any event to be tested from the console must be registered the
+same way the shipped track is.
+
+## Untested
+
+Neither of these is known either way, and neither affects the shipped mod, which uses one track in
+one bank with a segment it owns.
+
+- Whether a segment defined in another bank can be targeted successfully, and whether it sounds
+  while its own hierarchy is inactive.
+- Whether one bank can carry several tracks, and whether several banks can be loaded together.
+  Vanilla banks hold hundreds of events each, so there is no reason to expect a low limit.
 
 ## Patching the resources
 
