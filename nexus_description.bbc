@@ -52,6 +52,10 @@ Delete those four paths. No save cleanup is needed.
 [*]The track is added once. Loading a save made before installing is fine.
 [/list]
 [line]
+[color=#ffff00][size=5][b]Source[/b][/size][/color]
+The source is on [url=https://github.com/spuddeh/cp2077-hardest-to-be-growl-fm]GitHub[/url]. If you want the technical side - what a radio track actually is in Wwise terms, why a station's playlist cannot be reached with a tweak, and the things that make a correct-looking soundbank play silence - that is written up in [url=https://github.com/spuddeh/cp2077-hardest-to-be-growl-fm/blob/main/docs/how-it-works.md]how-it-works.md[/url].
+
+[line]
 [color=#ffff00][size=5][b]Credits[/b][/size][/color]
 [list]
 [*][b]Hardest to Be[/b] written by P.T. Adamczyk, lyrics and vocals by Sora Lion. Music belongs to CD PROJEKT RED, and this mod plays your own copy of it.
