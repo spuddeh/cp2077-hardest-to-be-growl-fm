@@ -66,13 +66,15 @@ and plays inaudibly until the declared duration elapses.
 source. Offsets valid for a single-source track read a two-source track's second plugin id as a
 playlist-item count. Read the source count and walk the record.
 
-**One track per bank, so far.** A bank declaring six events sounded only the first, and the second
-event used a source that plays correctly as the sole entry of its own bank. One track per bank is
-the only configuration verified to work.
+**One track per bank.** A bank declaring several events sounds only the first, whatever the rest
+declare. A three-event bank built from one source, with the second entry's segment parented to a
+different station's playlist and the third to the same one, played only the first entry. Holding
+the source constant rules out the audio, and the second entry rules out a per-playlist limit.
 
-The cause is not established. Every segment in those tests declared the same parent, Growl FM's
-playlist, so a limit of one added segment per vanilla playlist would explain the result equally
-well. A bank with two events whose segments have different parents would separate the two.
+The mechanism is still unknown. The objects are structurally sound - a generated multi-entry bank
+walks cleanly to its chunk boundary with every event resolving through action, segment and track to
+the right source. Object ordering is untested: entries are emitted as track, segment, action, event
+repeated, rather than grouped by type.
 
 **Declared duration.** `minDuration` must be the audible length, not the file length. Ten of the
 thirteen Growl FM tracks trim one to eight seconds off the tail and declare the trimmed value. An
