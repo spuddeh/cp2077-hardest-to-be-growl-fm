@@ -3,7 +3,7 @@
 // Author: Spuddeh
 // Description: Adds Hardest to Be to Growl FM's playlist, from the game's own audio.
 // File Version: 0.1.0
-// Credits: Restore Nebula by ArmanIII, for the runtime metadata patch; AudioXL by DigitalVixen.
+// Credits: AudioXL by DigitalVixen.
 // ======================================================================================
 
 module HardestToBeGrowlFM
