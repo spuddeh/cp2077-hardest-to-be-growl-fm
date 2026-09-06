@@ -49,3 +49,14 @@ The entry is authored in `tools/onscreens.json`. Its `primaryKey` is `0`, which 
 ArchiveXL derive the keys: it registers the entry under `FNV1a32` of the secondary key and again
 under `FNV1a64`. `primaryLocKey` in the `.reds` is the 64-bit hash and must be recomputed if the
 key string changes.
+
+## License
+
+Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). You may use, modify, and share
+this mod and its source for any **noncommercial** purpose, as long as you credit the original
+creator. Commercial use, including paid mods or selling, is not permitted.
+
+## Disclaimer
+
+This mod was developed with the assistance of an LLM. All in-game testing and code validation was
+performed by a human. No rogue AIs were permitted through the Blackwall.
