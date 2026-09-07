@@ -9,7 +9,7 @@ station.
 
 ## Requirements
 
-- [AudioXL](https://www.nexusmods.com/cyberpunk2077/mods/23851) - loads the soundbank
+- [AudioXL](https://www.nexusmods.com/cyberpunk2077/mods/33442) - loads the soundbank
 - [ArchiveXL](https://www.nexusmods.com/cyberpunk2077/mods/4198) - the track title
 - [Codeware](https://www.nexusmods.com/cyberpunk2077/mods/7780)
 - [redscript](https://www.nexusmods.com/cyberpunk2077/mods/1511)
