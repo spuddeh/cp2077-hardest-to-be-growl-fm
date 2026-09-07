@@ -3,7 +3,7 @@
 Adds *Hardest to Be* to 89.7 Growl FM, so it comes up in rotation like any other track on the
 station.
 
-**Nexus:** <https://www.nexusmods.com/games/cyberpunk2077/mods/33600>
+**Nexus:** <https://www.nexusmods.com/cyberpunk2077/mods/33600>
 
 **The mod ships no audio.** The song is already in the game, and the mod points at that copy.
 
@@ -57,7 +57,7 @@ key string changes.
 Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). You may use, modify, and share
 this mod and its source for any **noncommercial** purpose, as long as you credit the original
 creator. Commercial use, including paid mods or selling, is not permitted. This mirrors the
-[mod's Nexus permissions](https://www.nexusmods.com/games/cyberpunk2077/mods/33600).
+[mod's Nexus permissions](https://www.nexusmods.com/cyberpunk2077/mods/33600).
 
 ## Disclaimer
 
