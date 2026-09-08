@@ -29,8 +29,9 @@ ATT_ROCK_PLAYLIST = 845273388
 BANK_VERSION = 150
 LANGUAGE_ID = 393239870
 
-SEGMENT_VOLUME_DB = -14.5    # a cloned segment carries no volume of its own; see set_segment_volume
-SEGMENT_PROPS = 18           # cProps of NodeInitialParams, measured from a wwiser dump
+SEG_FX = 5                   # bIsOverrideParentFX in a MusicSegment, from a wwiser dump
+SEG_BUS = 9                  # OverrideBusId, two bytes after the empty effect block
+SEG_PROPS = 18               # cProps of NodeInitialParams
 
 
 def fnv(name):
@@ -117,15 +118,51 @@ def retime_automation(body, old_audible_ms, new_audible_ms):
     return moved
 
 
-def set_segment_volume(segment, db):
-    """Give a MusicSegment a Volume property, which the template does not carry.
+def parse_station(body):
+    """Read a station playlist's own routing: its effect chain, its bus and its Volume.
 
-    NodeInitialParams holds an AkPropBundle: cProps as u8, then cProps property ids as u8, then
-    cProps values as f32. An empty bundle is the single byte 0, so the write grows the record by
-    five bytes - which is why nothing downstream may assume a segment's size.
+    A station is heard through its pair of CPR Voice Broadcast Send effects and nowhere else - the
+    dry output is muted at -96 dB - so these three fields ARE the station's sound.
     """
-    assert segment[SEGMENT_PROPS] == 0, "template segment already carries node properties"
-    segment[SEGMENT_PROPS:SEGMENT_PROPS + 1] = struct.pack("<BBf", 1, 0, db)
+    pos = 5
+    override_fx, count = body[pos], body[pos + 1]
+    pos += 2
+    fx = b""
+    if count:
+        fx = bytes(body[pos:pos + 1 + 6 * count])       # bBypassAll, then count FXChunks
+        pos += 1 + 6 * count
+    pos += 2                                            # metadata override, and its own count
+    bus = struct.unpack_from("<I", body, pos)[0]
+    pos += 8                                            # bus, then DirectParentID
+    pos += 1                                            # byBitVector
+    props = {}
+    for i in range(body[pos]):
+        pid = body[pos + 1 + i]
+        props[pid] = struct.unpack_from("<f", body, pos + 1 + body[pos] + 4 * i)[0]
+    return dict(override_fx=override_fx, count=count, fx=fx, bus=bus, volume=props.get(0))
+
+
+def adopt_station(segment, station):
+    """Give a cloned segment the station's own effects, bus and Volume.
+
+    A segment in another bank does not pick these up from its parent, so it plays dry, off the
+    broadcast chain and at the source's own level. Writing them onto the segment puts it back on
+    the station's path whatever the parent link does. The effect block grows the record, so every
+    field after it moves and nothing may use a fixed offset past this point.
+    """
+    assert segment[SEG_FX] == 0 and segment[SEG_FX + 1] == 0,         "template segment already carries an effect chain"
+    assert station["count"], "station playlist carries no effects to adopt"
+    assert station["volume"] is not None, "station playlist carries no Volume"
+
+    block = bytes([1, station["count"]]) + station["fx"]
+    segment[SEG_FX:SEG_FX + 2] = block
+    shift = len(block) - 2
+
+    struct.pack_into("<I", segment, SEG_BUS + shift, station["bus"])
+
+    props = SEG_PROPS + shift
+    assert segment[props] == 0, "template segment already carries node properties"
+    segment[props:props + 1] = struct.pack("<BBf", 1, 0, station["volume"])
 
 
 def find_source(banks, source_wem):
@@ -239,7 +276,7 @@ def build_track(radio, music, event_name, source_wem, end_trim, bank_id, parent=
     if parent and parent != GROWL_PLAYLIST:
         assert replace_u32(segment, GROWL_PLAYLIST, parent) == 1
     assert replace_f64(segment, tmpl_seg_length, audible) == 2
-    set_segment_volume(segment, SEGMENT_VOLUME_DB)
+    adopt_station(segment, parse_station(radio[parent or GROWL_PLAYLIST][1]))
 
     action = bytearray(action_body)
     struct.pack_into("<I", action, 0, action_id)
