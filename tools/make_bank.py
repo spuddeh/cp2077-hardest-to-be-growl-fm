@@ -29,7 +29,7 @@ ATT_ROCK_PLAYLIST = 845273388
 BANK_VERSION = 150
 LANGUAGE_ID = 393239870
 
-SEGMENT_VOLUME_DB = -3.0     # a cloned segment carries no volume of its own; see set_segment_volume
+SEGMENT_VOLUME_DB = -14.5    # a cloned segment carries no volume of its own; see set_segment_volume
 SEGMENT_PROPS = 18           # cProps of NodeInitialParams, measured from a wwiser dump
 
 
