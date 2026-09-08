@@ -29,6 +29,9 @@ ATT_ROCK_PLAYLIST = 845273388
 BANK_VERSION = 150
 LANGUAGE_ID = 393239870
 
+SEGMENT_VOLUME_DB = -3.0     # a cloned segment carries no volume of its own; see set_segment_volume
+SEGMENT_PROPS = 18           # cProps of NodeInitialParams, measured from a wwiser dump
+
 
 def fnv(name):
     h = 2166136261
@@ -112,6 +115,17 @@ def retime_automation(body, old_audible_ms, new_audible_ms):
                 moved += 1
             pos += 12
     return moved
+
+
+def set_segment_volume(segment, db):
+    """Give a MusicSegment a Volume property, which the template does not carry.
+
+    NodeInitialParams holds an AkPropBundle: cProps as u8, then cProps property ids as u8, then
+    cProps values as f32. An empty bundle is the single byte 0, so the write grows the record by
+    five bytes - which is why nothing downstream may assume a segment's size.
+    """
+    assert segment[SEGMENT_PROPS] == 0, "template segment already carries node properties"
+    segment[SEGMENT_PROPS:SEGMENT_PROPS + 1] = struct.pack("<BBf", 1, 0, db)
 
 
 def find_source(banks, source_wem):
@@ -225,6 +239,7 @@ def build_track(radio, music, event_name, source_wem, end_trim, bank_id, parent=
     if parent and parent != GROWL_PLAYLIST:
         assert replace_u32(segment, GROWL_PLAYLIST, parent) == 1
     assert replace_f64(segment, tmpl_seg_length, audible) == 2
+    set_segment_volume(segment, SEGMENT_VOLUME_DB)
 
     action = bytearray(action_body)
     struct.pack_into("<I", action, 0, action_id)
