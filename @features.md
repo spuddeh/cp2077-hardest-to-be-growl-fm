@@ -9,6 +9,8 @@
 - The station shows `P.T. Adamczyk, Sora Lion - Hardest to Be`, in all nineteen languages.
 - Coexists with Restore Nebula, which also adds a track to Growl FM. Verified in game: the station
   carries both, since each mod edits the loaded track list rather than replacing a file.
+- The track sits at Growl FM's own level and fades with distance like every other song, because the
+  segment carries the station's broadcast sends, bus and dry Volume rather than a tuned trim.
 
 ## Planned
 

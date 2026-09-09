@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.1] - 2026-09-09
+
+### Fixed
+- The track played about 15 dB above the rest of Growl FM, and did not attenuate with distance. A
+  station playlist mutes its own dry output at `Volume -96 dB` and is heard only through its pair of
+  CPR Voice Broadcast Send effects, and a segment defined in this bank inherits none of that from a
+  parent in `radio.bnk`. The clone was playing dry, on the raw music path, at the source file's own
+  level. `make_bank.py` now reads the parent playlist's effect chain, bus and Volume and writes them
+  onto the cloned segment, so the level comes from the station's own send trim rather than a number.
+  Measured at one world device across a continuous capture: -21.2 LUFS against vanilla neighbours at
+  -19.5 to -24.4, where it had been -10.9 and clipping at +0.7 dBFS true peak.
+
+### Notes
+- `parse_station` and `adopt_station` handle the record growing: the effect block moves
+  `OverrideBusId` and the property bundle, so no offset past it is fixed.
+
 ## [1.0.0] - 2026-09-07
 
 First release.
