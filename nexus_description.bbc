@@ -49,9 +49,20 @@ Delete those four paths. No save cleanup is needed.
 [list]
 [*]The station's track list is edited in memory as the game loads it. No vanilla file is replaced, so nothing is overwritten for another mod to disagree with.
 [*]It adds to a stock station rather than creating one, so it does not compete with mods that add their own stations.
-[*]Tested alongside [url=https://www.nexusmods.com/cyberpunk2077/mods/17042]Restore Nebula[/url], which also adds a track to Growl FM. Both appear, because each mod edits the loaded track list rather than replacing a file.
+[*][url=https://www.nexusmods.com/cyberpunk2077/mods/17042]Restore Nebula[/url] also adds a track to Growl FM, and on its own it loses that track when this mod is installed. Install the [b]Restore Nebula Compatibility Patch[/b] from the optional files and both play. Details below.
 [*]The track is added once. Loading a save made before installing is fine.
 [/list]
+[line]
+[color=#ffff00][size=5][b]Optional files[/b][/size][/color]
+[color=#ffff00][size=4][b]Restore Nebula Compatibility Patch[/b][/size][/color]
+Restore Nebula adds its track only when it hears the game finish loading the station data. This mod reads that data as soon as scripts start, so by the time Restore Nebula is listening the load is already over, and Nebula is never added. No error, the song just never comes up.
+
+The patch adds Nebula's entry itself, the same way this mod adds Hardest to Be. It checks before adding so nothing goes in twice, and it does nothing at all unless Restore Nebula is installed. The audio and the title are still Restore Nebula's; this only tells the station the track exists.
+
+Install it beside both mods. One file:
+[code]Cyberpunk 20776\scripts\HardestToBeGrowlFM\RestoreNebulaCompatibilityPatch.reds[/code]
+I have sent the fix to Restore Nebula's author. Once it is in their mod, this file can be removed.
+
 [line]
 [color=#ffff00][size=5][b]Source[/b][/size][/color]
 The source is on [url=https://github.com/spuddeh/cp2077-hardest-to-be-growl-fm]GitHub[/url]. If you want the technical side - what a radio track actually is in Wwise terms, why a station's playlist cannot be reached with a tweak, and the things that make a correct-looking soundbank play silence - that is written up in [url=https://github.com/spuddeh/cp2077-hardest-to-be-growl-fm/blob/main/docs/how-it-works.md]how-it-works.md[/url].
