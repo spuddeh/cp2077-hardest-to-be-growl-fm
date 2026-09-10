@@ -60,7 +60,7 @@ Restore Nebula adds its track only when it hears the game finish loading the sta
 The patch adds Nebula's entry itself, the same way this mod adds Hardest to Be. It checks before adding so nothing goes in twice, and it does nothing at all unless Restore Nebula is installed. The audio and the title are still Restore Nebula's; this only tells the station the track exists.
 
 Install it beside both mods. One file:
-[code]Cyberpunk 20776\scripts\HardestToBeGrowlFM\RestoreNebulaCompatibilityPatch.reds[/code]
+[code]Cyberpunk 2077\r6\scripts\HardestToBeGrowlFM\RestoreNebulaCompatibilityPatch.reds[/code]
 I have sent the fix to Restore Nebula's author. Once it is in their mod, this file can be removed.
 
 [line]
