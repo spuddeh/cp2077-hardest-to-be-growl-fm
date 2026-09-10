@@ -10,7 +10,7 @@
 //              check first, so it adds nothing twice and does nothing when Restore Nebula is not
 //              installed. The audio, the title and everything else stay Restore Nebula's.
 // File Version: 1.0.0
-// Credits: arman3 (Restore Nebula), psiberx (Codeware), DigitalVixen (RedLogger)
+// Credits: sfasvafvadevrtar (Restore Nebula), psiberx (Codeware), DigitalVixen (RedLogger)
 // ======================================================================================
 
 module HardestToBeGrowlFM.RestoreNebulaCompatibilityPatch
