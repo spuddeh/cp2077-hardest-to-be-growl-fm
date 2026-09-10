@@ -1,6 +1,6 @@
 // ======================================================================================
-// Mod Name: Hardest to Be on Growl FM - Nebula Loader
-// File: NebulaLoader.reds
+// Mod Name: Hardest to Be on Growl FM - Restore Nebula Compatibility Patch
+// File: RestoreNebulaCompatibilityPatch.reds
 // Author: Spuddeh
 // Description: Puts Restore Nebula's track on Growl FM when a mod that reads the station data at
 //              script start is installed. Restore Nebula adds its track only when it hears that
@@ -13,20 +13,20 @@
 // Credits: arman3 (Restore Nebula), psiberx (Codeware), DigitalVixen (RedLogger)
 // ======================================================================================
 
-module HardestToBeGrowlFM.NebulaLoader
+module HardestToBeGrowlFM.RestoreNebulaCompatibilityPatch
 
 @if(ModuleExists("RedLogger"))
 import RedLogger.*
 
 @if(ModuleExists("RedLogger"))
-public func NebulaLoaderLog(msg: String) -> Void {
+public func RestoreNebulaPatchLog(msg: String) -> Void {
   RedLog.Append("HardestToBeGrowlFM", msg);
 }
 
 @if(!ModuleExists("RedLogger"))
-public func NebulaLoaderLog(msg: String) -> Void {}
+public func RestoreNebulaPatchLog(msg: String) -> Void {}
 
-public class HardestToBeNebulaLoader extends ScriptableService {
+public class HardestToBeRestoreNebulaPatch extends ScriptableService {
 
   // The values Restore Nebula 1.04 writes. Facts about its archive, not its code: the event the
   // bank defines, that event's Wwise id and length, and the title's two keys.
@@ -44,7 +44,7 @@ public class HardestToBeNebulaLoader extends ScriptableService {
     // A file only Restore Nebula's archive provides. Without it there is no audio to point at,
     // and adding the row would put silence on the station.
     if !depot.ResourceExists(r"mod\\arman3_return_nebula\\localization\\en-us\\onscreens\\restore_nebula_onscreens.json") {
-      NebulaLoaderLog("Restore Nebula is not installed - Nebula loader idle");
+      RestoreNebulaPatchLog("Restore Nebula is not installed - compatibility patch idle");
       return;
     }
 
@@ -101,7 +101,7 @@ public class HardestToBeNebulaLoader extends ScriptableService {
     row.maxAttenuation = 0;
     row.tags = [n"GrowlFM"];
     ArrayPush(events.events, row);
-    NebulaLoaderLog("Nebula: event row added as the event table loaded");
+    RestoreNebulaPatchLog("Nebula: event row added as the event table loaded");
   }
 
   // The station's track list and the title table.
@@ -125,7 +125,7 @@ public class HardestToBeNebulaLoader extends ScriptableService {
       }
     }
     if added {
-      NebulaLoaderLog("Nebula: track added to Growl FM as the station data loaded");
+      RestoreNebulaPatchLog("Nebula: track added to Growl FM as the station data loaded");
     }
   }
 

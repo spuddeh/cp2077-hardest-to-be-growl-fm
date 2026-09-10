@@ -28,14 +28,14 @@ same levels as the rest of the station.
 
 Full write-up: [docs/how-it-works.md](docs/how-it-works.md).
 
-## Optional file: Nebula Loader
+## Optional file: Restore Nebula Compatibility Patch
 
 Restore Nebula adds its track to Growl FM only when it hears the station data finish loading, and
 a mod that reads that data at script start, this one included, makes the read happen before Restore
-Nebula is listening. The track is then never added. The optional Nebula Loader file reads the data
+Nebula is listening. The track is then never added. The optional Restore Nebula Compatibility Patch reads the data
 itself and adds Restore Nebula's row, checking first so nothing is added twice, and doing nothing
 when Restore Nebula is not installed. Source in
-[optional-files/nebula-loader](optional-files/nebula-loader/). Remove it once Restore Nebula
+[optional-files/restore-nebula-compatibility-patch](optional-files/restore-nebula-compatibility-patch/). Remove it once Restore Nebula
 carries the fix.
 
 ## Building the soundbank

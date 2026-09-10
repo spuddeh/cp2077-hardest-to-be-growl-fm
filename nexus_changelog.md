@@ -1,6 +1,6 @@
 # Changelog
 
-### [Nebula Loader v1.0.0] (optional file)
+### [Restore Nebula Compatibility Patch v1.0.0] (optional file)
 - Keeps Restore Nebula's track on Growl FM when this mod or Native Radio Framework is installed.
   Restore Nebula on its own loses the track beside either of them. Needs Restore Nebula; does
   nothing without it. Remove once Restore Nebula is updated.

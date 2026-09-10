@@ -4,7 +4,7 @@
 
 ### Added
 
-- Optional file `Nebula Loader` (`optional-files/nebula-loader`, artifact `nebula-loader`, its own
+- Optional file `Restore Nebula Compatibility Patch` (`optional-files/restore-nebula-compatibility-patch`, artifact `restore-nebula-compatibility-patch`, its own
   version 1.0.0): a standalone service that adds Restore Nebula's event row, track and title from
   the depot-token path with add-once checks, guarded by `ResourceExists` on a file only Restore
   Nebula's archive provides. Restore Nebula 1.04 listens for `Resource/Loaded` only and is never
