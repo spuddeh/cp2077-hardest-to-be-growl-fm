@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Optional file `Nebula Loader` (`optional-files/nebula-loader`, artifact `nebula-loader`, its own
+  version 1.0.0): a standalone service that adds Restore Nebula's event row, track and title from
+  the depot-token path with add-once checks, guarded by `ResourceExists` on a file only Restore
+  Nebula's archive provides. Restore Nebula 1.04 listens for `Resource/Loaded` only and is never
+  told about a resource this mod or NRF loads at script start.
+
 ## [1.0.1] - 2026-09-09
 
 ### Fixed

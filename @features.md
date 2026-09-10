@@ -7,8 +7,10 @@
 - The vocal recording is used, the one from the hangout playlist. The instrumental cue from the
   Alex scene is a different file and is not played.
 - The station shows `P.T. Adamczyk, Sora Lion - Hardest to Be`, in all nineteen languages.
-- Coexists with Restore Nebula, which also adds a track to Growl FM. Verified in game: the station
-  carries both, since each mod edits the loaded track list rather than replacing a file.
+- Coexists with Restore Nebula, which also adds a track to Growl FM, through the optional Nebula
+  Loader file. Without it Restore Nebula's track is lost: Restore Nebula only listens for the
+  station data finishing its load, and this mod's read at script start happens first. The loader
+  adds Restore Nebula's row itself, once, and only when Restore Nebula is installed.
 - The track sits at Growl FM's own level and fades with distance like every other song, because the
   segment carries the station's broadcast sends, bus and dry Volume rather than a tuned trim.
 
