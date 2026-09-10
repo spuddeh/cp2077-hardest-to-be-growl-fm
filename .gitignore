@@ -13,3 +13,6 @@ __pycache__/
 .vscode/
 .history/
 *.log
+
+# Release zips are built, never committed
+*.zip
