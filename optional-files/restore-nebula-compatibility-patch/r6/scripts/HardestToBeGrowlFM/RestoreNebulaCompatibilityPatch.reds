@@ -5,7 +5,7 @@
 // Description: Puts Restore Nebula's track on Growl FM when a mod that reads the station data at
 //              script start is installed. Restore Nebula adds its track only when it hears that
 //              data finish loading, and a resource another mod has already asked for is not
-//              announced again, so beside Native Radio Framework or Hardest to Be the track is
+//              announced again, so beside RadioXL or Hardest to Be the track is
 //              never added. This reads each resource directly and adds the row itself, with a
 //              check first, so it adds nothing twice and does nothing when Restore Nebula is not
 //              installed. The audio, the title and everything else stay Restore Nebula's.

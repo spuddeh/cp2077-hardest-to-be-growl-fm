@@ -1,6 +1,6 @@
 # Restore Nebula Compatibility Patch (optional file)
 
-Puts Restore Nebula's track on Growl FM when this mod, Native Radio Framework, or any other mod
+Puts Restore Nebula's track on Growl FM when this mod, RadioXL, or any other mod
 that reads the station data at script start is installed beside it.
 
 Restore Nebula 1.04 adds its track only when it hears the station data finish loading. A resource
@@ -9,7 +9,7 @@ track is never added. This file reads the resources directly and adds the row it
 first so it never adds twice, and doing nothing when Restore Nebula is not installed. The audio,
 the title and the rest of the mod remain Restore Nebula's.
 
-Verified in game beside Native Radio Framework and this mod's main file: Growl FM carries all
+Verified in game beside RadioXL and this mod's main file: Growl FM carries all
 fifteen tracks and Nebula plays.
 
 Ships as its own zip: `optional-files/restore-nebula-compatibility-patch/r6` staged as `r6`. Remove it once Restore
