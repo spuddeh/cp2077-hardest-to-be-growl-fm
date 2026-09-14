@@ -47,11 +47,18 @@ Cyberpunk 2077\red4ext\plugins\AudioXL\sounds\HardestToBeGrowlFM\[/code]
 Delete those four paths. No save cleanup is needed.
 
 [line]
+[color=#ffff00][size=5][b]More songs from the game[/b][/size][/color]
+Songs the game has but never puts on the radio, each added to a station the same way as this one:
+[list]
+[*][url=https://www.nexusmods.com/cyberpunk2077/mods/33754]Phantom Liberty on Growl FM[/url] - the Phantom Liberty end-credits song by Dawid Podsiadło and P.T. Adamczyk, on 89.7 Growl FM.[/*]
+[*][url=https://www.nexusmods.com/cyberpunk2077/mods/NFA_NEXUS_ID]Never Fade Away on Morro Rock Radio[/url] - the base game end-credits cover of Never Fade Away by P.T. Adamczyk and Olga Jankowska, on 107.3 Morro Rock Radio.[/*]
+[/list]
+[line]
 [color=#ffff00][size=5][b]Compatibility[/b][/size][/color]
 [list]
 [*]The station's track list is edited in memory as the game loads it. No vanilla file is replaced, so nothing is overwritten for another mod to disagree with.[/*]
 [*]It adds to a stock station rather than creating one, so it does not compete with mods that add their own stations.[/*]
-[*][url=https://www.nexusmods.com/cyberpunk2077/mods/17042]Restore Nebula[/url] also adds a track to Growl FM, and on its own it loses that track when this mod is installed. Install the [b]Restore Nebula Compatibility Patch[/b] from the optional files and both play. Details below.[/*]
+[*][url=https://www.nexusmods.com/cyberpunk2077/mods/17042]Restore Nebula[/url] also adds a track to Growl FM, and on its own it loses that track when this mod is installed. Install the [b]Restore Nebula Compatibility Patch[/b] from the optional files and both play. The same patch covers the two mods above. Details under Optional files.[/*]
 [*]The track is added once. Loading a save made before installing is fine.[/*]
 [/list]
 [line]
@@ -61,7 +68,9 @@ Restore Nebula adds its track only when it hears the game finish loading the sta
 
 The patch adds Nebula's entry itself, the same way this mod adds Hardest to Be. It checks before adding so nothing goes in twice, and it does nothing at all unless Restore Nebula is installed. The audio and the title are still Restore Nebula's; this only tells the station the track exists.
 
-Install it beside both mods. One file:
+The same patch covers [url=https://www.nexusmods.com/cyberpunk2077/mods/33754]Phantom Liberty on Growl FM[/url] and [url=https://www.nexusmods.com/cyberpunk2077/mods/NFA_NEXUS_ID]Never Fade Away on Morro Rock Radio[/url], which cause the same problem, and it does not need Hardest to Be installed. One patch is enough however many of the three you use.
+
+Install it beside Restore Nebula. One file:
 [code]Cyberpunk 2077\r6\scripts\HardestToBeGrowlFM\RestoreNebulaCompatibilityPatch.reds[/code]
 I have sent the fix to Restore Nebula's author. Once it is in their mod, this file can be removed.
 
