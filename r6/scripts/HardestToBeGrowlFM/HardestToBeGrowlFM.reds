@@ -2,7 +2,7 @@
 // Mod Name: Hardest to Be on Growl FM
 // Author: Spuddeh
 // Description: Adds Hardest to Be to Growl FM's playlist, from the game's own audio.
-// Mod Version: 1.0.1
+// Mod Version: 1.0.2
 // Credits: AudioXL by DigitalVixen.
 // ======================================================================================
 
