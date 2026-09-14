@@ -64,10 +64,11 @@ key string changes.
 
 ## License
 
-Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). You may use, modify, and share
-this mod and its source for any **noncommercial** purpose, as long as you credit the original
-creator. Commercial use, including paid mods or selling, is not permitted. This mirrors the
-[mod's Nexus permissions](https://www.nexusmods.com/cyberpunk2077/mods/33600).
+Licensed under the [PolyForm Strict License 1.0.0](LICENSE.md). You may use this mod and read its source
+for any **noncommercial** purpose. You may not share or re-upload it, or make changes or new works based on
+it, without permission. Commercial use, including paid mods or selling, is not permitted.
+
+Permission requests go through the [Nexus Mods page](https://www.nexusmods.com/cyberpunk2077/mods/33600).
 
 ## Disclaimer
 
