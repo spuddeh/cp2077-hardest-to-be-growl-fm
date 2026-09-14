@@ -18,7 +18,6 @@ module HardestToBeGrowlFM.RestoreNebulaCompatibilityPatch
 @if(ModuleExists("RedLogger"))
 import RedLogger.*
 
-@if(ModuleExists("AudioXL"))
 import AudioXL.*
 
 @if(ModuleExists("RedLogger"))
@@ -64,7 +63,7 @@ public class HardestToBeRestoreNebulaPatch extends ScriptableService {
   // A token taken from OnLoad for a resource with no token yet starts the load inside Codeware's
   // OnLoad loop, and Restore Nebula's own listener misses it. Only take one when a token exists.
   private func Watch(depot: ref<ResourceDepot>, path: ResRef, callback: CName) -> Void {
-    if !this.AlreadyRequested(path) {
+    if !AudioXLNative.IsResourceRequested(path) {
       return;
     }
     let token = depot.LoadResource(path);
@@ -72,16 +71,6 @@ public class HardestToBeRestoreNebulaPatch extends ScriptableService {
       ArrayPush(this.m_tokens, token);
       token.RegisterCallback(this, callback);
     }
-  }
-
-  @if(ModuleExists("AudioXL"))
-  private func AlreadyRequested(path: ResRef) -> Bool {
-    return AudioXLNative.IsResourceRequested(path);
-  }
-
-  @if(!ModuleExists("AudioXL"))
-  private func AlreadyRequested(path: ResRef) -> Bool {
-    return false;
   }
 
   private cb func OnEventsMetadata(event: ref<ResourceEvent>) {
