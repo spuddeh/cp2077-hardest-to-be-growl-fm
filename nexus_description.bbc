@@ -51,7 +51,7 @@ Delete those four paths. No save cleanup is needed.
 Songs the game has but never puts on the radio, each added to a station the same way as this one:
 [list]
 [*][url=https://www.nexusmods.com/cyberpunk2077/mods/33754]Phantom Liberty on Growl FM[/url] - the Phantom Liberty end-credits song by Dawid Podsiadło and P.T. Adamczyk, on 89.7 Growl FM.[/*]
-[*][url=https://www.nexusmods.com/cyberpunk2077/mods/NFA_NEXUS_ID]Never Fade Away on Morro Rock Radio[/url] - the base game end-credits cover of Never Fade Away by P.T. Adamczyk and Olga Jankowska, on 107.3 Morro Rock Radio.[/*]
+[*][url=https://www.nexusmods.com/cyberpunk2077/mods/33902]Never Fade Away on Morro Rock Radio[/url] - the base game end-credits cover of Never Fade Away by P.T. Adamczyk and Olga Jankowska, on 107.3 Morro Rock Radio.[/*]
 [/list]
 [line]
 [color=#ffff00][size=5][b]Compatibility[/b][/size][/color]
@@ -68,7 +68,7 @@ Restore Nebula adds its track only when it hears the game finish loading the sta
 
 The patch adds Nebula's entry itself, the same way this mod adds Hardest to Be. It checks before adding so nothing goes in twice, and it does nothing at all unless Restore Nebula is installed. The audio and the title are still Restore Nebula's; this only tells the station the track exists.
 
-The same patch covers [url=https://www.nexusmods.com/cyberpunk2077/mods/33754]Phantom Liberty on Growl FM[/url] and [url=https://www.nexusmods.com/cyberpunk2077/mods/NFA_NEXUS_ID]Never Fade Away on Morro Rock Radio[/url], which cause the same problem, and it does not need Hardest to Be installed. One patch is enough however many of the three you use.
+The same patch covers [url=https://www.nexusmods.com/cyberpunk2077/mods/33754]Phantom Liberty on Growl FM[/url] and [url=https://www.nexusmods.com/cyberpunk2077/mods/33902]Never Fade Away on Morro Rock Radio[/url], which cause the same problem, and it does not need Hardest to Be installed. One patch is enough however many of the three you use.
 
 Install it beside Restore Nebula. One file:
 [code]Cyberpunk 2077\r6\scripts\HardestToBeGrowlFM\RestoreNebulaCompatibilityPatch.reds[/code]
